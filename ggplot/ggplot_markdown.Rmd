@@ -1,0 +1,91 @@
+# Using ggplot2 for differenct type of features :
+## By Gowtham
+
+**Part1**
+
+
+#Basic data types and suitable plots :
+
+#1) Numeric,Numeric -> Scaterplot
+#2)Categorical,Numeric -> box plot , bar plot
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+library(tidyverse)
+library(dplyr)
+#ggplot 2 numeric variables : dot and line with X,Y :
+ggplot(data=BOD,
+       mapping =aes(x = Time,
+                    y=demand))+geom_point(size=5)+geom_line(colour='red')
+
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+#ggplot2 above with linear line for trend and split by a variable Type(categorical) and heading :
+ggplot(CO2,aes(conc,uptake,colour=Treatment))+geom_point(size=3)+
+  geom_smooth(method=lm,se=F)+facet_wrap(~Type)+labs(title="Concentration of Co2")+theme_bw()
+
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+#ggplot2 with Treatment(categorical) vs uptake(numeric) using boxplot :
+
+ggplot(CO2,aes(Treatment,uptake))+geom_boxplot()+
+  geom_point(aes(size=conc,color=Plant))+coord_flip()+
+  theme_bw()+facet_wrap(~Type)
+
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+#ggplot2  apply filter to data and same as above :
+ggplot(mpg%>%filter(cty<25),aes(x=displ,y=cty))+
+  geom_point(aes(size=trans,color=drv),alpha=0.5)+geom_smooth(method=lm)+
+  facet_wrap(~year)+labs(x="Engone size",y="MPG in city",title="Fuel efficiency")+theme_bw()
+
+```
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+#plot single categorical variable - bar chart x= cat ,y=count of obs , remove na's: 
+ggplot(msleep%>%drop_na(vore),aes(x=vore))+geom_bar()+labs(x="Vore",y="Number of obs",title="Number of obs per vore type")
+
+#plot single numeric variable - histogram  x=numeric value , y=count of obs:
+ggplot(msleep%>%drop_na(awake),aes(x=awake))+geom_histogram(binwidth = 2)
+
+#plot two categorical variables 1st as category and 2nd as color of bar side-by-side: 
+head(starwars)
+#method 1 using position='dodge':
+ggplot(starwars%>%filter(hair_color %in% c('black','brown'))%>%drop_na(sex),aes(hair_color,fill=sex))+
+  geom_bar(position='dodge',alpha=0.5)+theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  labs(x="hair color",y="count of obs",title = "Count of hair color by Sex")
+#method 2 using facet_wrap:
+ggplot(starwars%>%filter(hair_color %in% c('black','brown'))%>%drop_na(sex),aes(sex))+
+  geom_bar(aes(fill=sex),alpha=0.5)+facet_wrap(~hair_color)
+
+
+```
+
+
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+#Tell story with data : 
+
+#single numeric data : histogram , density plot , box plot , violin plot(similar to density plot )
+#single categorical variable : bar plot 
+
+
+#two categorical and one numeric : split by facet wrap (category) and density plot(numeric) with color(category)
+ggplot(starwars%>%filter(hair_color %in% c('black','brown'))%>%drop_na(sex),aes(x=height))+geom_density(aes(fill=sex),alpha=0.5)+
+  facet_wrap(~hair_color)
+
+#two numeric and one categorical : scatter plot (2 numeric) and color of dot(categorical) and optional facet the categorical:
+ggplot(starwars%>%filter(hair_color %in% c('black','brown'))%>%drop_na(sex),aes(x=height,y=mass))+geom_point(aes(colour=sex,size=4))
+
+#three numeric one categorical : scatter plot (2 numeric) and size of dot (numeric) and color of dot (categorical)
+library(gapminder)
+ggplot(gapminder%>%filter(continent %in% c('Africa','Europe')& gdpPercap<30000),
+  aes(gdpPercap,lifeExp))+geom_point(aes(size=pop,colour=year),alpha=0.5)+facet_wrap(~continent)
+```
